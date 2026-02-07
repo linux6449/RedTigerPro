@@ -33,11 +33,7 @@
   <img src="Img/RedTigerPro4.png" width="49%"> 
   <img src="Img/RedTigerPro5.png" width="49%">
   <br><br>
-</p>
-
-<h1 align="center">Features</h1>
-<p>
-   
+</p> 
 
 <h1 align="center">Requirements</h1>
 
@@ -57,9 +53,6 @@
 </p>
 
 <h1 align="center">Installation</h1>
-
-<a href="https://github.com/linux6449/RedTigerPro.zip">Dowloads "RedTiger-Tools.zip" Here</a>
-<p>
   
 ```
 1 - Download the .zip folder.
