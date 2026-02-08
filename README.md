@@ -16,7 +16,6 @@
 <h1 align="center">Disclaimer</h1>
 
 <p>
-  
   - RedTigerPro Tools has been developed solely for educational purposes.<br>
   - This project has been created with good intentions and is intended for personal use only.<br>
   - By choosing to use RedTigerPro, you acknowledge and accept full responsibility for any consequences that may result from your actions.<br>
@@ -63,7 +62,7 @@ Or
 ```
 1 - Open a terminal.
 2 - Write "git clone https://github.com/linux6449/RedTigerPro.git"
-3 - Write "cd RedTiger-Tools"
+3 - Write "cd RedTigerPro"
 4 - Write "git pull"
 5 - Write "python Setup.py"
 ```
