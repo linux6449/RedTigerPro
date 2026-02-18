@@ -57,6 +57,7 @@
 1 - Download the .zip folder.
 2 - Unzip the folder.
 3 - Launch "Setup.py".
+4 - (Video - https://www.tiktok.com/@anonymus12.1/video/7608258454830042390?is_from_webapp=1&sender_device=pc)
 ```
 Or
 ```
@@ -65,6 +66,7 @@ Or
 3 - Write "cd RedTigerPro"
 4 - Write "git pull"
 5 - Write "python Setup.py"
+6 - (Video - https://www.tiktok.com/@anonymus12.1/video/7607091338143599894?is_from_webapp=1&sender_device=pc)
 ```
 <br><br>
 </p>
