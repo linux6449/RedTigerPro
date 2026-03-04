@@ -44,7 +44,8 @@ try:
                 'pyqt5': 'PyQt5',
                 'pyqtwebengine': 'PyQt5.QtWebEngine',
                 'colorama': 'colorama',
-                'requests': 'requests'
+                'requests': 'requests',
+                'yt-dlp': 'yt_dlp',
             }
             
             if package_name in alternative_names:
@@ -55,17 +56,20 @@ try:
                     return False
             return False
 
-    def install_package(package, max_retries=3):
+    def install_package(package, max_retries=3, pip_cmd=None):
+        if pip_cmd is None:
+            pip_cmd = [sys.executable, "-m", "pip"]
+            
         for attempt in range(max_retries):
             try:
                 print(f"  Installing: {package} (attempt {attempt + 1}/{max_retries})")
-                subprocess.check_call(
-                    [sys.executable, "-m", "pip", "install", "--upgrade", package],
+                result = subprocess.run(
+                    pip_cmd + ["install", "--upgrade", package],
                     stdout=subprocess.DEVNULL,
                     stderr=subprocess.DEVNULL
                 )
                 
-                if is_package_installed(package):
+                if result.returncode == 0 and is_package_installed(package):
                     print(f"  {package} successfully installed")
                     return True
                 else:
@@ -80,7 +84,10 @@ try:
                     print(f"  Failed to install {package} after {max_retries} attempts")
         return False
 
-    def install_requirements():
+    def install_requirements(pip_cmd=None):
+        if pip_cmd is None:
+            pip_cmd = [sys.executable, "-m", "pip"]
+            
         requirements_file = "requirements.txt"
         if not os.path.exists(requirements_file):
             print(f"Error: {requirements_file} not found!")
@@ -106,7 +113,7 @@ try:
                     success_count += 1
                     continue
                 
-                if install_package(package):
+                if install_package(package, pip_cmd=pip_cmd):
                     success_count += 1
                 else:
                     failed_packages.append(package)
@@ -131,7 +138,7 @@ try:
             return False
 
     def verify_critical_packages():
-        critical_packages = ['colorama', 'requests', 'pyzipper']
+        critical_packages = ['colorama', 'requests', 'pyzipper', 'yt_dlp']
         missing = []
         
         print("\nChecking critical packages...")
@@ -144,15 +151,18 @@ try:
         
         return missing
 
-    def install_basic_packages():
+    def install_basic_packages(pip_cmd=None):
         """Külön telepíti a colorama és requests csomagokat"""
+        if pip_cmd is None:
+            pip_cmd = [sys.executable, "-m", "pip"]
+            
         print("\nInstalling basic required packages...")
-        basic_packages = ['colorama', 'requests']
+        basic_packages = ['colorama', 'requests', 'setuptools', 'wheel']
         
         for package in basic_packages:
             if not is_package_installed(package):
                 print(f"  Installing {package}...")
-                install_package(package)
+                install_package(package, pip_cmd=pip_cmd)
             else:
                 print(f"  ✓ {package} already installed")
 
@@ -178,7 +188,55 @@ try:
                 return ctypes.windll.shell32.IsUserAnAdmin()
             except:
                 return False
-        return True
+        else:
+            # Linux-on check if running as root
+            return os.geteuid() == 0
+
+    def install_linux_system_packages():
+        """Telepíti a szükséges rendszer csomagokat Linuxon"""
+        print("\nChecking required system packages...")
+        
+        system_packages = [
+            'python3-pip',
+            'python3-dev',
+            'python3-venv',
+            'build-essential',
+            'libssl-dev',
+            'libffi-dev',
+            'libxml2-dev',
+            'libxslt1-dev',
+            'zlib1g-dev',
+            'ffmpeg'  # yt-dlp-nek ajánlott
+        ]
+        
+        try:
+            # Ellenőrizzük, hogy apt-get elérhető-e
+            subprocess.run(['which', 'apt-get'], check=True, stdout=subprocess.DEVNULL)
+            
+            # Frissítjük a csomaglistát
+            print("  Updating package list...")
+            subprocess.run(['sudo', 'apt-get', 'update'], check=True)
+            
+            # Telepítjük a csomagokat
+            for package in system_packages:
+                print(f"  Installing {package}...")
+                subprocess.run(
+                    ['sudo', 'apt-get', 'install', '-y', package],
+                    check=True,
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.DEVNULL
+                )
+            
+            print("  ✓ System packages installed successfully")
+            return True
+            
+        except subprocess.CalledProcessError as e:
+            print(f"  ✗ Failed to install system packages: {e}")
+            return False
+        except FileNotFoundError:
+            print("  ✗ apt-get not found. Please install packages manually:")
+            print(f"     sudo apt-get install {' '.join(system_packages)}")
+            return False
 
     def main():
         if not check_python_version():
@@ -186,6 +244,7 @@ try:
             return
 
         if sys.platform.startswith("win"):
+            # Windows telepítés
             os.system("cls")
             print("="*70)
             print("RedTigerPro Tool Installer - Windows")
@@ -202,82 +261,97 @@ try:
             print("Updating pip...")
             subprocess.check_call([sys.executable, "-m", "pip", "install", "--upgrade", "pip"])
             
-            install_basic_packages()
+            pip_cmd = [sys.executable, "-m", "pip"]
+            install_basic_packages(pip_cmd)
+            install_requirements(pip_cmd)
             
-            print("\nInstalling basic packages...")
-            install_package("setuptools")
-            install_package("wheel")
-            
-            print("\nInstalling requirements.txt...")
-            install_requirements()
-            
-            missing_critical = verify_critical_packages()
-            
-            if missing_critical:
-                print(f"\n⚠ Some critical packages missing: {', '.join(missing_critical)}")
-                print("Try installing them manually:")
-                for pkg in missing_critical:
-                    print(f"   pip install {pkg}")
-                
-                if 'pyzipper' in missing_critical:
-                    print("\nTrying to install pyzipper separately...")
-                    subprocess.check_call([sys.executable, "-m", "pip", "install", "--upgrade", "pyzipper"])
-                    
-                    if is_package_installed('pyzipper'):
-                        print("✓ pyzipper is now installed")
-                        missing_critical.remove('pyzipper')
-            
-            OpenSites()
-            
-            print("\n" + "="*70)
-            if not missing_critical:
-                print("✓ All critical packages installed!")
-                
-                print("\nStarting RedTigerPro Tool in 3 seconds...")
-                time.sleep(3)
-                os.system(f'"{sys.executable}" RedTigerPro.py')
-            else:
-                print(f"✗ Missing critical packages: {', '.join(missing_critical)}")
-                print("Please install them manually and try again.")
-                input("\nPress Enter to exit...")
-
         elif sys.platform.startswith("linux"):
+            # Linux telepítés - DENO NÉLKÜL!
             os.system("clear")
             print("="*70)
             print("RedTigerPro Tool Installer - Linux")
             print("="*70)
             
+            # Ellenőrizzük a root jogosultságot
+            if check_admin_rights():
+                print("✓ Root privileges OK")
+            else:
+                print("⚠ Not running as root!")
+                print("Some packages may require root privileges.")
+                response = input("Continue anyway? (y/n): ")
+                if response.lower() != 'y':
+                    sys.exit(1)
+            
+            # Telepítjük a rendszer csomagokat
+            install_linux_system_packages()
+            
             print("\nInstalling Python modules:\n")
             
+            # Meghatározzuk a pip parancsot
+            python_cmd = sys.executable
+            pip_cmd = [python_cmd, "-m", "pip"]
+            
+            # pip frissítés
             print("Updating pip...")
-            os.system("pip3 install --upgrade pip")
+            try:
+                subprocess.check_call(pip_cmd + ["install", "--upgrade", "pip"])
+                print("  ✓ pip updated successfully")
+            except subprocess.CalledProcessError as e:
+                print(f"  ✗ Failed to update pip: {e}")
             
-            install_basic_packages()
+            # Alap csomagok telepítése
+            install_basic_packages(pip_cmd)
             
-            print("\nInstalling basic packages...")
-            os.system("pip3 install setuptools wheel")
-            
+            # requirements.txt telepítése
             print("\nInstalling requirements.txt...")
-            if os.path.exists("requirements.txt"):
-                os.system("pip3 install -r requirements.txt")
-            else:
-                print("requirements.txt not found!")
+            install_requirements(pip_cmd)
             
+            # Ellenőrizzük a kritikus csomagokat
             missing_critical = verify_critical_packages()
-
+            
+            # Ha hiányzik a yt-dlp, próbáljuk újra
+            if 'yt_dlp' in missing_critical:
+                print("\nTrying to install yt-dlp separately...")
+                install_package('yt-dlp', pip_cmd=pip_cmd)
+                missing_critical = verify_critical_packages()
+            
+            # Weboldalak megnyitása
             OpenSites()
             
+            print("\n" + "="*70)
+            
+            # Eredmény kiértékelése
             if not missing_critical:
-                print("\nStarting RedTigerPro Tool...")
-                time.sleep(2)
-                os.system("python3 RedTigerPro.py")
+                print("✓ All critical packages installed!")
+                print("\nStarting RedTigerPro Tool in 3 seconds...")
+                time.sleep(3)
+                
+                # Indítás
+                try:
+                    subprocess.run([python_cmd, "RedTigerPro.py"])
+                except Exception as e:
+                    print(f"Failed to start RedTigerPro.py: {e}")
+                    print("You can start it manually with: python3 RedTigerPro.py")
             else:
-                print(f"\nMissing critical packages: {', '.join(missing_critical)}")
+                print(f"✗ Missing critical packages: {', '.join(missing_critical)}")
+                print("\nTrying to install missing packages with pip3...")
+                for pkg in missing_critical:
+                    pkg_name = pkg.replace('_', '-')  # yt_dlp -> yt-dlp
+                    try:
+                        subprocess.check_call(['pip3', 'install', '--upgrade', pkg_name])
+                        print(f"  ✓ {pkg_name} installed")
+                    except:
+                        print(f"  ✗ Failed to install {pkg_name}")
+                
+                print("\nPlease check the errors above and try again.")
+                input("\nPress Enter to exit...")
+                return
         
+        # Közös rész
         print("\n" + "="*70)
         print("Installation completed!")
         print("="*70)
-    
+
     main()
 
 except KeyboardInterrupt:
