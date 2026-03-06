@@ -125,7 +125,7 @@ option_95 = "Soon"
 
 option_96 = "Youtube-Downloader"
 option_97 = "TikTok-Downloader"
-option_98 = "Soon"
+option_98 = "Instagram-Downloader"
 option_99 = "Soon"
 option_100 = "Soon"
 
@@ -304,8 +304,8 @@ menu4 = f""" ┌─ {option_info_txt}                                           
  └─┬─────────┤    web    ├───────────────┬────────┤ Osint2 ├─────────────────────┬──────┤ Downloader ├────────────┘
    │         └───────────┘               │        └────────┘                     │      └────────────┘
    ├─ {option_80_txt                    }├─ {option_86_txt                    }  ├─ {option_96_txt                    }
-   ├─ {option_81_txt                    }├─ {option_87_txt                    }  └─ {option_97_txt                    }
-   └─ {option_82_txt                    }├─ {option_88_txt                    }
+   ├─ {option_81_txt                    }├─ {option_87_txt                    }  ├─ {option_97_txt                    }
+   └─ {option_82_txt                    }├─ {option_88_txt                    }  └─ {option_98_txt                    }
                                          └─ {option_89_txt                    }                                                                                                                      
                                     
                                 
